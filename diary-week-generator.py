@@ -18,7 +18,7 @@ def generate_week_text(week_number, year):
     return week_text
 
 def main():
-    user_input = input("Enter week number(s) (e.g., '38' or '38-40'): ")
+    user_input = input("Enter week number(s) (e.g., '38', '38-40', or '38-'): ")
 
     # Split the input into parts based on '-'
     input_parts = user_input.split('-')
@@ -26,13 +26,19 @@ def main():
     if len(input_parts) == 1:
         # Single week input
         week_numbers = [int(input_parts[0])]
+    elif len(input_parts) == 2 and input_parts[1].strip() == "":
+        # Input with a trailing dash, generate all weeks from the specified week to the end of the year
+        start_week = int(input_parts[0])
+        current_year = datetime.datetime.now().year
+        week_numbers = list(range(start_week, (54 if datetime.datetime(current_year, 12, 31).isocalendar()[1] == 1 else 53) + 1))
+        print(f"start_week: {start_week};   week_numbers: {week_numbers};")
     elif len(input_parts) == 2:
         # Range of weeks input
         start_week = int(input_parts[0])
         end_week = int(input_parts[1])
         week_numbers = list(range(start_week, end_week + 1))
     else:
-        print("Invalid input format. Please enter a single week or a range of weeks.")
+        print("Invalid input format. Please enter a single week, a range of weeks, or a range with a trailing dash.")
         return
 
     year = int(input("Enter the year: "))
