@@ -17,9 +17,29 @@ def generate_week_text(week_number, year):
 
     return week_text
 
-# User input
-week_number = int(input("Enter the week number: "))
-year = int(input("Enter the year: "))
+def main():
+    user_input = input("Enter week number(s) (e.g., '38' or '38-40'): ")
 
-result = generate_week_text(week_number, year)
-print(result)
+    # Split the input into parts based on '-'
+    input_parts = user_input.split('-')
+
+    if len(input_parts) == 1:
+        # Single week input
+        week_numbers = [int(input_parts[0])]
+    elif len(input_parts) == 2:
+        # Range of weeks input
+        start_week = int(input_parts[0])
+        end_week = int(input_parts[1])
+        week_numbers = list(range(start_week, end_week + 1))
+    else:
+        print("Invalid input format. Please enter a single week or a range of weeks.")
+        return
+
+    year = int(input("Enter the year: "))
+
+    for week_number in week_numbers:
+        result = generate_week_text(week_number, year)
+        print(result)
+
+if __name__ == "__main__":
+    main()
