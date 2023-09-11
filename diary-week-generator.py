@@ -1,21 +1,27 @@
 import datetime
+from docx import Document
 
 def generate_week_text(week_number, year):
-    # Calculate the date of the first day of the week
-    first_day_of_week = datetime.datetime.strptime(f'{year}-W{week_number}-1', "%Y-W%W-%w")
+    doc = Document()
 
-    # Calculate the dates for the days of the week
-    week_days = [first_day_of_week + datetime.timedelta(days=i) for i in range(7)]
+    # Add the title
+    title = doc.add_heading(f'WEEK {week_number}', level=1)
 
-    # Format the text
-    week_text = f'WEEK {week_number}\nWeek goals\n'
-    for day in week_days:
-        formatted_date = day.strftime("%a %d.%m.%y")
-        week_text += f"{formatted_date}\n"
+    # Add the week goals section
+    doc.add_heading('Week goals', level=2)
 
-    week_text += 'Week recap'
+    # Calculate the start date of the week
+    start_date = datetime.date.fromisocalendar(year, week_number, 1)
 
-    return week_text
+    for i in range(7):
+        current_date = start_date + datetime.timedelta(days=i)
+        formatted_date = current_date.strftime("%a %d.%m.%y")
+        doc.add_heading(formatted_date, level=2)
+
+    # Add the week recap section
+    doc.add_heading('Week recap', level=2)
+
+    return doc
 
 def main():
     user_input = input("Enter week number(s) (e.g., '38', '38-40', or '38-'): ")
@@ -30,8 +36,9 @@ def main():
         # Input with a trailing dash, generate all weeks from the specified week to the end of the year
         start_week = int(input_parts[0])
         current_year = datetime.datetime.now().year
-        week_numbers = list(range(start_week, (54 if datetime.datetime(current_year, 12, 31).isocalendar()[1] == 1 else 53) + 1))
-        print(f"start_week: {start_week};   week_numbers: {week_numbers};")
+        week_number_of_dec_31 = datetime.datetime(current_year, 12, 31).isocalendar()[1]
+        week_number_of_week_before_dec_31_week = datetime.datetime(current_year, 12, 31 - 7).isocalendar()[1]
+        week_numbers = list(range(start_week, (week_number_of_week_before_dec_31_week if week_number_of_dec_31 == 1 else week_number_of_dec_31) + 1))
     elif len(input_parts) == 2:
         # Range of weeks input
         start_week = int(input_parts[0])
@@ -43,9 +50,15 @@ def main():
 
     year = int(input("Enter the year: "))
 
+    # Create a single document and add weeks to it
+    doc = Document()
     for week_number in week_numbers:
-        result = generate_week_text(week_number, year)
-        print(result)
+        week_doc = generate_week_text(week_number, year)
+        for element in week_doc.element.body:
+            doc.element.body.append(element)
+
+    # Save the single document, overwriting the previous content
+    doc.save('Weeks.docx')
 
 if __name__ == "__main__":
     main()
